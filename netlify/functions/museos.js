@@ -1,4 +1,5 @@
 import { getRedisClient, setJSON, getJSON, deleteKey, getAllByPattern } from './redis-client.js';
+import { ensureCatalogSeed } from './bootstrap.js';
 import { getUserFromToken, successResponse, errorResponse, handleOptions, generateId } from './utils.js';
 
 export async function handler(event) {
@@ -8,11 +9,14 @@ export async function handler(event) {
 
   try {
     const user = getUserFromToken(event);
-    if (!user) {
+    const requiresAuth = !['GET', 'OPTIONS'].includes(event.httpMethod);
+
+    if (requiresAuth && !user) {
       return errorResponse(401, 'No autenticado');
     }
 
-    await getRedisClient();
+    const redis = await getRedisClient();
+    await ensureCatalogSeed(redis);
 
     let path = event.path || '';
     path = path.replace('/.netlify/functions/museos', '');
@@ -40,7 +44,29 @@ export async function handler(event) {
 
       // Obtener colección del museo
       const todasPinturas = await getAllByPattern('pintura:*');
-      museo.coleccion = todasPinturas.filter(p => p.museoId === id);
+      const coleccion = [];
+
+      for (const pintura of todasPinturas) {
+        if (pintura.museoId !== id) {
+          continue;
+        }
+
+        const enriched = { ...pintura };
+
+        if (pintura.artistaId) {
+          enriched.artista = await getJSON(`artista:${pintura.artistaId}`);
+        }
+
+        enriched.museo = {
+          id: museo.id,
+          nombre: museo.nombre,
+          ciudad: museo.ciudad,
+          pais: museo.pais
+        };
+        coleccion.push(enriched);
+      }
+
+      museo.coleccion = coleccion;
 
       return successResponse(museo);
     }

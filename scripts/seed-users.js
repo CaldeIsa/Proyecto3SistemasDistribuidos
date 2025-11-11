@@ -1,58 +1,70 @@
 import 'dotenv/config';
 import { createClient } from 'redis';
 import bcrypt from 'bcryptjs';
+import { defaultUsers } from '../shared/default-users.js';
+import { USERS_SEED_FLAG } from '../shared/constants.js';
 
-const client = createClient({
-  url: process.env.REDIS_URL,
-  socket: {
+const redisUrl = process.env.REDIS_URL;
+
+if (!redisUrl) {
+  throw new Error('REDIS_URL no está configurada en .env');
+}
+
+const config = {
+  url: redisUrl
+};
+
+if (redisUrl?.startsWith('rediss://')) {
+  config.socket = {
     tls: true,
     rejectUnauthorized: false
-  }
-});
+  };
+}
+
+const client = createClient(config);
 
 client.on('error', (err) => console.error('Redis Client Error:', err));
 
 async function seedUsers() {
   try {
     console.log('🌱 Creando usuarios de prueba...');
-    
+
     await client.connect();
     console.log('✅ Conectado a Redis');
 
-    // Limpiar usuarios anteriores
     const userKeys = await client.keys('usuario:*');
-    if (userKeys.length > 0) {
-      await client.del(userKeys);
-      console.log('🗑️  Usuarios anteriores eliminados');
+    const keysToDelete = [...userKeys];
+
+    const metaExists = await client.exists(USERS_SEED_FLAG);
+    if (metaExists) {
+      keysToDelete.push(USERS_SEED_FLAG);
     }
 
-    // Crear usuarios
-    const users = [
-      {
-        id: 'admin',
-        username: 'admin',
-        password: await bcrypt.hash('admin123', 10),
-        role: 'admin',
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: 'usuario',
-        username: 'usuario',
-        password: await bcrypt.hash('usuario123', 10),
-        role: 'user',
-        createdAt: new Date().toISOString()
-      }
-    ];
-
-    for (const user of users) {
-      await client.set(`usuario:${user.id}`, JSON.stringify(user));
+    if (keysToDelete.length > 0) {
+      await client.del(...keysToDelete);
+      console.log(`🗑️  ${keysToDelete.length} claves de usuario eliminadas`);
     }
 
-    console.log(`✅ ${users.length} usuarios creados`);
+    for (const user of defaultUsers) {
+      const hashedPassword = await bcrypt.hash(user.password, 10);
+      const now = new Date().toISOString();
+      const payload = {
+        ...user,
+        password: hashedPassword,
+        createdAt: now,
+        updatedAt: now
+      };
+
+      await client.set(`usuario:${user.id}`, JSON.stringify(payload));
+    }
+
+    await client.set(USERS_SEED_FLAG, new Date().toISOString());
+
+    console.log(`✅ ${defaultUsers.length} usuarios creados`);
     console.log('\n👥 Usuarios de prueba:');
-    console.log('Admin: username=admin, password=admin123');
-    console.log('Usuario: username=usuario, password=usuario123');
-
+    for (const user of defaultUsers) {
+      console.log(`${user.role === 'admin' ? 'Admin' : 'Usuario'}: username=${user.username}, password=${user.password}`);
+    }
   } catch (error) {
     console.error('❌ Error:', error);
   } finally {

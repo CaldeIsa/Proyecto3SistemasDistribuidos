@@ -11,23 +11,23 @@
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; margin-bottom: 32px;">
         <div>
           <h3 style="color: #667eea; margin-bottom: 8px;">Artista</h3>
-          <router-link 
-            v-if="pintura.artistaId" 
-            :to="`/artistas/${pintura.artistaId._id}`"
+          <router-link
+            v-if="pintura.artista"
+            :to="`/artistas/${pintura.artista.id}`"
             style="color: #333; text-decoration: none; font-size: 1.1em; font-weight: 600;"
           >
-            {{ pintura.artistaId.nombreCompleto }} →
+            {{ pintura.artista.nombreCompleto }} →
           </router-link>
         </div>
 
         <div>
           <h3 style="color: #667eea; margin-bottom: 8px;">Museo</h3>
-          <router-link 
-            v-if="pintura.museoId" 
-            :to="`/museos/${pintura.museoId._id}`"
+          <router-link
+            v-if="pintura.museo"
+            :to="`/museos/${pintura.museo.id}`"
             style="color: #333; text-decoration: none; font-size: 1.1em; font-weight: 600;"
           >
-            {{ pintura.museoId.nombre }} →
+            {{ pintura.museo.nombre }} →
           </router-link>
         </div>
 
@@ -72,8 +72,8 @@ const error = ref('')
 const loadPintura = async () => {
   try {
     loading.value = true
-    const response = await api.get(`/pinturas-get/${route.params.id}`)
-    pintura.value = response.data.data
+    const response = await api.get(`/pinturas/${route.params.id}`)
+    pintura.value = response.data?.data ?? null
   } catch (err) {
     error.value = 'Error al cargar la pintura'
     console.error(err)

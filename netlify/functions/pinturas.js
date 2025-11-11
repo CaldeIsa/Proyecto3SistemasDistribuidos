@@ -9,7 +9,9 @@ export async function handler(event) {
   try {
     // Verificar autenticación
     const user = getUserFromToken(event);
-    if (!user) {
+    const requiresAuth = !['GET', 'OPTIONS'].includes(event.httpMethod);
+
+    if (requiresAuth && !user) {
       return errorResponse(401, 'No autenticado');
     }
 

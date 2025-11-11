@@ -7,7 +7,7 @@
     "dev": "netlify dev",
     "seed": "node scripts/seed-data.js",
     "seed-users": "node scripts/seed-users.js",
-    "build": "cd frontend && npm run build"
+    "build": "npm --prefix frontend run build"
   },
   "dependencies": {
     "redis": "^4.6.12",

@@ -14,7 +14,7 @@
           <p style="font-size: 1.1em;">{{ museo.ciudad }}, {{ museo.pais }}</p>
         </div>
 
-        <div>
+        <div v-if="museo.tipo">
           <h3 style="color: #667eea; margin-bottom: 8px;">Tipo</h3>
           <p style="font-size: 1.1em;">{{ museo.tipo }}</p>
         </div>
@@ -35,19 +35,19 @@
         <p style="line-height: 1.8; font-size: 1.1em;">{{ museo.descripcion }}</p>
       </div>
 
-      <div v-if="museo.pinturas && museo.pinturas.length > 0">
-        <h3 style="color: #667eea; margin-bottom: 16px;">Obras en la colección ({{ museo.pinturas.length }})</h3>
+      <div v-if="museo.coleccion && museo.coleccion.length > 0">
+        <h3 style="color: #667eea; margin-bottom: 16px;">Obras en la colección ({{ museo.coleccion.length }})</h3>
         <div class="grid">
-          <router-link 
-            v-for="pintura in museo.pinturas" 
-            :key="pintura._id" 
-            :to="`/pinturas/${pintura._id}`"
+          <router-link
+            v-for="pintura in museo.coleccion"
+            :key="pintura.id"
+            :to="`/pinturas/${pintura.id}`"
             class="entity-card"
           >
             <img :src="pintura.imagenUrl" :alt="pintura.titulo" class="entity-card-image" />
             <div class="entity-card-content">
               <div class="entity-card-title">{{ pintura.titulo }}</div>
-              <div class="entity-card-subtitle">{{ pintura.artistaId?.nombreCompleto }}</div>
+              <div class="entity-card-subtitle">{{ pintura.artista?.nombreCompleto || 'Autor desconocido' }}</div>
               <div class="entity-card-text">{{ pintura.anio }}</div>
             </div>
           </router-link>
@@ -74,8 +74,8 @@ const error = ref('')
 const loadMuseo = async () => {
   try {
     loading.value = true
-    const response = await api.get(`/museos-get/${route.params.id}`)
-    museo.value = response.data.data
+    const response = await api.get(`/museos/${route.params.id}`)
+    museo.value = response.data?.data ?? null
   } catch (err) {
     error.value = 'Error al cargar el museo'
     console.error(err)

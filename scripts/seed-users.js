@@ -2,13 +2,24 @@ import 'dotenv/config';
 import { createClient } from 'redis';
 import bcrypt from 'bcryptjs';
 
-const client = createClient({
-  url: process.env.REDIS_URL,
-  socket: {
+const redisUrl = process.env.REDIS_URL;
+
+if (!redisUrl) {
+  throw new Error('REDIS_URL no está configurada en .env');
+}
+
+const config = {
+  url: redisUrl
+};
+
+if (redisUrl?.startsWith('rediss://')) {
+  config.socket = {
     tls: true,
     rejectUnauthorized: false
-  }
-});
+  };
+}
+
+const client = createClient(config);
 
 client.on('error', (err) => console.error('Redis Client Error:', err));
 

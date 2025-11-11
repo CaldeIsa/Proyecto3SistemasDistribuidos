@@ -1,0 +1,21 @@
+{
+  "name": "proyecto3-catalogo-pinturas-redis",
+  "version": "3.0.0",
+  "description": "Catálogo de Pinturas Famosas con Redis y Netlify Functions",
+  "type": "module",
+  "scripts": {
+    "dev": "netlify dev",
+    "seed": "node scripts/seed-data.js",
+    "seed-users": "node scripts/seed-users.js",
+    "build": "cd frontend && npm run build"
+  },
+  "dependencies": {
+    "redis": "^4.6.12",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.10.1"
+  }
+}

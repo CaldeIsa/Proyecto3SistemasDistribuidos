@@ -1,4 +1,5 @@
 import { getRedisClient, setJSON, getJSON, deleteKey, getAllByPattern } from './redis-client.js';
+import { ensureCatalogSeed } from './bootstrap.js';
 import { getUserFromToken, successResponse, errorResponse, handleOptions, generateId } from './utils.js';
 
 export async function handler(event) {
@@ -14,7 +15,8 @@ export async function handler(event) {
       return errorResponse(401, 'No autenticado');
     }
 
-    await getRedisClient();
+    const redis = await getRedisClient();
+    await ensureCatalogSeed(redis);
 
     let path = event.path || '';
     path = path.replace('/.netlify/functions/artistas', '');

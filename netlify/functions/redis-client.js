@@ -9,13 +9,15 @@ export async function getRedisClient() {
 
   try {
     const redisUrl = process.env.REDIS_URL;
-    
-    // Configuración del cliente según el protocolo
+
+    if (!redisUrl) {
+      throw new Error('La variable de entorno REDIS_URL no está configurada.');
+    }
+
     const config = {
       url: redisUrl
     };
 
-    // Si la URL usa rediss:// (TLS), configurar TLS
     if (redisUrl.startsWith('rediss://')) {
       config.socket = {
         tls: true,
@@ -29,9 +31,10 @@ export async function getRedisClient() {
 
     await client.connect();
     console.log('✅ Conectado a Redis');
-    
+
     return client;
   } catch (error) {
+    client = null;
     console.error('❌ Error conectando a Redis:', error);
     throw error;
   }
@@ -44,11 +47,10 @@ export async function closeRedisClient() {
   }
 }
 
-// Utilidades para manejar datos en Redis
 export async function setJSON(key, value, expirationSeconds = null) {
   const redis = await getRedisClient();
   const data = JSON.stringify(value);
-  
+
   if (expirationSeconds) {
     await redis.setEx(key, expirationSeconds, data);
   } else {
@@ -75,13 +77,13 @@ export async function getAllKeys(pattern) {
 export async function getAllByPattern(pattern) {
   const keys = await getAllKeys(pattern);
   const results = [];
-  
+
   for (const key of keys) {
     const data = await getJSON(key);
     if (data) {
       results.push({ key, ...data });
     }
   }
-  
+
   return results;
 }

@@ -58,6 +58,8 @@ npm run seed
 npm run seed-users
 ```
 
+> 💡 **Tip:** En Netlify o en cualquier entorno remoto, las funciones comprueban automáticamente si Redis está vacío y poblan los catálogos y usuarios de prueba en el primer acceso. Si necesitas forzar la carga manual en otro Redis, exporta la variable `REDIS_URL` apuntando a esa instancia antes de ejecutar los comandos anteriores.
+
 ### 5. Compilar Frontend
 
 ```bash

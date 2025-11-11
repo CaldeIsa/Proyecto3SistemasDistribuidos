@@ -6,7 +6,7 @@
 [dev]
   command = "cd frontend && npm run dev"
   port = 3000
-  targetPort = 3000
+  targetPort = 5173
   publish = "frontend/dist"
   autoLaunch = false
 

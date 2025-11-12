@@ -38,6 +38,8 @@ REDIS_URL=redis://default:TU_PASSWORD@TU_HOST:TU_PORT
 JWT_SECRET=proyecto3-secret-key-super-seguro-cambiar-en-produccion
 ```
 
+> 📦 Cuando construyas el frontend fuera de Netlify (por ejemplo para GitHub Pages) puedes definir variables adicionales como `VITE_API_BASE_URL` y `VITE_PUBLIC_BASE_PATH` para apuntar al backend publicado y establecer el prefijo de rutas.
+
 ### 3. Instalar Dependencias
 
 ```bash
@@ -150,7 +152,7 @@ usuario:admin
 1. Sube el proyecto a GitHub
 2. Conecta con Netlify
 3. Configuración:
-   - Build command: `cd frontend && npm install && npm run build`
+   - Build command: `npm install --prefix frontend && npm --prefix frontend run build`
    - Publish directory: `frontend/dist`
    - Functions directory: `netlify/functions`
 4. Configura variables de entorno:
@@ -175,6 +177,26 @@ netlify env:set JWT_SECRET "tu-secret"
 
 # Deploy
 netlify deploy --prod
+```
+
+## 🌐 Despliegue híbrido: GitHub Pages (frontend) + Netlify Functions (backend)
+
+Si quieres servir únicamente el frontend desde **GitHub Pages** y mantener las funciones serverless y Redis en **Netlify**, el repositorio ya incluye un flujo de trabajo automatizado.
+
+1. **Asegura el backend en Netlify.** Configura un sitio en Netlify (ver sección anterior) y anota la URL pública, por ejemplo `https://tu-sitio.netlify.app`.
+2. **Define el endpoint para el frontend.** En tu repositorio de GitHub ve a **Settings → Secrets and variables → Actions → New repository secret** y crea `VITE_API_BASE_URL` con el valor `https://tu-sitio.netlify.app/.netlify/functions`.
+3. **Activa GitHub Pages.** El workflow `.github/workflows/deploy-gh-pages.yml` compila la app con la base correcta (`/` o `/<repo>/` según corresponda) y publica la carpeta `frontend/dist`.
+4. **Dispara el despliegue.** Haz push a `main` o ejecuta el workflow manualmente desde la pestaña *Actions*. El paso “Validate API base URL secret” verifica que la URL del backend esté configurada antes de construir.
+5. **Rutas amigables garantizadas.** El archivo `frontend/public/404.html` redirige cualquier ruta desconocida a `index.html`, permitiendo que Vue Router maneje la navegación en GitHub Pages.
+
+> ℹ️ Las funciones de Netlify siguen alimentando Redis automáticamente en el primer acceso (o cuando detectan la base vacía), por lo que no necesitas ejecutar los scripts de seed manualmente en producción.
+
+### Personalizar la base pública de Vite manualmente
+
+Si necesitas un prefijo diferente al calculado automáticamente (por ejemplo para pruebas locales), exporta la variable antes de construir:
+
+```bash
+VITE_PUBLIC_BASE_PATH="/mi-prefijo/" npm --prefix frontend run build
 ```
 
 ## 📁 Estructura del Proyecto

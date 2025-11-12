@@ -86,7 +86,7 @@ const handleRegister = async () => {
   loading.value = false
 
   if (result.success) {
-    router.push('/')
+    router.push({ name: 'Home' })
   } else {
     error.value = result.error
   }

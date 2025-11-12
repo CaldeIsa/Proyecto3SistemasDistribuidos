@@ -1,7 +1,18 @@
 import axios from 'axios';
 
+const rawBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+const normalizedBaseUrl = rawBaseUrl
+  ? rawBaseUrl.replace(/\/$/, '')
+  : '/api';
+
+const appBasePath = import.meta.env.BASE_URL || '/';
+const normalizedBasePath = appBasePath.endsWith('/')
+  ? appBasePath.slice(0, -1)
+  : appBasePath;
+const loginPath = `${normalizedBasePath || ''}/login`;
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: normalizedBaseUrl,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -28,7 +39,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      window.location.href = loginPath;
     }
     return Promise.reject(error);
   }

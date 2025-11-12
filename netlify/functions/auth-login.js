@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { getRedisClient, getJSON } from './redis-client.js';
+import { ensureDefaultUsers } from './bootstrap.js';
 import { generateToken, successResponse, errorResponse, handleOptions } from './utils.js';
 
 export async function handler(event) {
@@ -18,7 +19,8 @@ export async function handler(event) {
       return errorResponse(400, 'Usuario y contraseña son requeridos');
     }
 
-    await getRedisClient();
+    const redis = await getRedisClient();
+    await ensureDefaultUsers(redis);
 
     // Buscar usuario por username
     const user = await getJSON(`usuario:${username}`);

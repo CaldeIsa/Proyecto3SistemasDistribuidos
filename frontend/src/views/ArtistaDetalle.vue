@@ -33,13 +33,13 @@
         <p style="line-height: 1.8; font-size: 1.1em;">{{ artista.biografia }}</p>
       </div>
 
-      <div v-if="artista.pinturas && artista.pinturas.length > 0">
-        <h3 style="color: #667eea; margin-bottom: 16px;">Obras en el catálogo ({{ artista.pinturas.length }})</h3>
+      <div v-if="artista.obras && artista.obras.length > 0">
+        <h3 style="color: #667eea; margin-bottom: 16px;">Obras en el catálogo ({{ artista.obras.length }})</h3>
         <div class="grid">
-          <router-link 
-            v-for="pintura in artista.pinturas" 
-            :key="pintura._id" 
-            :to="`/pinturas/${pintura._id}`"
+          <router-link
+            v-for="pintura in artista.obras"
+            :key="pintura.id"
+            :to="`/pinturas/${pintura.id}`"
             class="entity-card"
           >
             <img :src="pintura.imagenUrl" :alt="pintura.titulo" class="entity-card-image" />
@@ -71,8 +71,8 @@ const error = ref('')
 const loadArtista = async () => {
   try {
     loading.value = true
-    const response = await api.get(`/artistas-get/${route.params.id}`)
-    artista.value = response.data.data
+    const response = await api.get(`/artistas/${route.params.id}`)
+    artista.value = response.data?.data ?? null
   } catch (err) {
     error.value = 'Error al cargar el artista'
     console.error(err)

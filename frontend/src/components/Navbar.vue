@@ -1,14 +1,14 @@
 <template>
   <nav class="navbar">
     <div class="navbar-content">
-      <router-link to="/" class="navbar-brand">🎨 Catálogo de Pinturas</router-link>
+      <router-link :to="{ name: 'Home' }" class="navbar-brand">🎨 Catálogo de Pinturas</router-link>
       
       <div class="navbar-menu">
-        <router-link to="/" class="navbar-link" active-class="active">Inicio</router-link>
-        <router-link to="/pinturas" class="navbar-link" active-class="active">Pinturas</router-link>
-        <router-link to="/artistas" class="navbar-link" active-class="active">Artistas</router-link>
-        <router-link to="/museos" class="navbar-link" active-class="active">Museos</router-link>
-        <router-link v-if="authStore.isAdmin" to="/admin" class="navbar-link" active-class="active">Admin</router-link>
+        <router-link :to="{ name: 'Home' }" class="navbar-link" active-class="active">Inicio</router-link>
+        <router-link :to="{ name: 'Pinturas' }" class="navbar-link" active-class="active">Pinturas</router-link>
+        <router-link :to="{ name: 'Artistas' }" class="navbar-link" active-class="active">Artistas</router-link>
+        <router-link :to="{ name: 'Museos' }" class="navbar-link" active-class="active">Museos</router-link>
+        <router-link v-if="authStore.isAdmin" :to="{ name: 'Admin' }" class="navbar-link" active-class="active">Admin</router-link>
         
         <div class="navbar-user">
           <span>{{ authStore.user?.nombre }}</span>
@@ -28,6 +28,6 @@ const authStore = useAuthStore()
 
 const handleLogout = () => {
   authStore.logout()
-  router.push('/login')
+  router.push({ name: 'Login' })
 }
 </script>
